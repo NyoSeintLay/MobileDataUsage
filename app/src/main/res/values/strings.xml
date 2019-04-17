@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">DataUsage</string>
+    <string name="app_name">Data Usage</string>
+    <string name="dataUsageInfo">The amount of data (Petabytes) sent over Singapore’s mobile networks from 2008 to 2018. </string>
 </resources>

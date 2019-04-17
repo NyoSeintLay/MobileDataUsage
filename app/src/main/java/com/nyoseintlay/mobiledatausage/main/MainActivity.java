@@ -5,7 +5,7 @@ package com.nyoseintlay.mobiledatausage.main;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -16,9 +16,10 @@ import android.widget.Toast;
 
 import com.nyoseintlay.mobiledatausage.adapter.DataUsageAdapter;
 import com.nyoseintlay.mobiledatausage.R;
-import com.nyoseintlay.mobiledatausage.model.DataUsage;
+import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements MainActivityInterface.MainView {
 
@@ -48,8 +49,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         setSupportActionBar(toolbar);
 
         recyclerView = findViewById(R.id.recycler_view_data_usage_list);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
+       // RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+        GridLayoutManager mGridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+        recyclerView.setLayoutManager(mGridLayoutManager);
 
     }
 
@@ -77,11 +79,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
      * */
     private RecyclerItemClickListener recyclerItemClickListener = new RecyclerItemClickListener() {
         @Override
-        public void onItemClick(DataUsage dataUsage) {
-
-            Toast.makeText(MainActivity.this,
-                    "Quarter:  " + dataUsage.getQuarter()+", Volume:"+dataUsage.getVolume_of_mobile_data(),
-                    Toast.LENGTH_LONG).show();
+        public void onItemClick(ArrayList<DataUsageRaw> dataUsageRawArrayList) {
+            String data="\n";
+            for(DataUsageRaw dataUsageRaw:dataUsageRawArrayList){
+                data += dataUsageRaw.getQuarter()+" - "+ dataUsageRaw.getVolume_of_mobile_data()+"\n";
+            }
+            Toast.makeText(MainActivity.this, data , Toast.LENGTH_LONG).show();
 
         }
     };
@@ -98,8 +101,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     }
 
     @Override
-    public void setDataToRecyclerView(ArrayList<DataUsage> dataUsageArrayList) {
-        DataUsageAdapter adapter = new DataUsageAdapter(dataUsageArrayList , recyclerItemClickListener);
+    public void setDataToRecyclerView(HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap) {
+        DataUsageAdapter adapter = new DataUsageAdapter(dataUsageHashMap, recyclerItemClickListener);
         recyclerView.setAdapter(adapter);
     }
 

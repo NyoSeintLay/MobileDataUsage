@@ -12,18 +12,38 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import com.nyoseintlay.mobiledatausage.R;
 import com.nyoseintlay.mobiledatausage.main.RecyclerItemClickListener;
-import com.nyoseintlay.mobiledatausage.model.DataUsage;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByYear;
+import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class DataUsageAdapter extends RecyclerView.Adapter<DataUsageAdapter.DataUsageViewHolder>{
 
-    private ArrayList<DataUsage> dataList;
+    private HashMap<Integer,ArrayList<DataUsageRaw>> dataList;
     private RecyclerItemClickListener recyclerItemClickListener;
+    private ArrayList<DataUsageByYear> dataUsageByYearArrayList = new ArrayList<>();
 
-    public DataUsageAdapter(ArrayList<DataUsage> dataList , RecyclerItemClickListener recyclerItemClickListener) {
+    public DataUsageAdapter(HashMap<Integer,ArrayList<DataUsageRaw>> dataList , RecyclerItemClickListener recyclerItemClickListener) {
         this.dataList = dataList;
         this.recyclerItemClickListener = recyclerItemClickListener;
+        setUpDataUsageByYear();
+
+    }
+
+    private void setUpDataUsageByYear(){
+        ArrayList<Integer> key = new ArrayList<>(this.dataList.keySet());
+        Collections.sort(key);
+        Double total_volume_per_year = 0.0;
+        for(int i=0;i<dataList.size();i++) {
+            Boolean decreasedVolume = false;
+            for (int j = 0; j < dataList.get(key.get(i)).size(); j++) {
+                total_volume_per_year += dataList.get(key.get(i)).get(j).getVolume_of_mobile_data();
+                if(j!=0 && dataList.get(key.get(i)).get(j-1).getVolume_of_mobile_data()>dataList.get(key.get(i)).get(j).getVolume_of_mobile_data()) decreasedVolume=true;
+            }
+            dataUsageByYearArrayList.add(new DataUsageByYear(key.get(i).toString(),total_volume_per_year,decreasedVolume));
+        }
     }
 
 
@@ -36,14 +56,16 @@ public class DataUsageAdapter extends RecyclerView.Adapter<DataUsageAdapter.Data
 
     @Override
     public void onBindViewHolder(DataUsageViewHolder holder, @SuppressLint("RecyclerView") final int position) {
-        holder.tvYear.setText(dataList.get(position).getQuarter());
-        holder.tvVolume.setText(dataList.get(position).getVolume_of_mobile_data()+"");
+        holder.tvYear.setText(dataUsageByYearArrayList.get(position).getYear());
+        holder.tvVolume.setText(String.format("%.6f", dataUsageByYearArrayList.get(position).getVolume_of_mobile_data_per_year()));
+        if(dataUsageByYearArrayList.get(position).getDecreasedVolume())holder.ibDecreasedVolume.setVisibility(View.VISIBLE);
+        else holder.ibDecreasedVolume.setVisibility(View.INVISIBLE);
 
 
         holder.ibDecreasedVolume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recyclerItemClickListener.onItemClick(dataList.get(position));
+                recyclerItemClickListener.onItemClick(dataList.get(Integer.parseInt(dataUsageByYearArrayList.get(position).getYear())));
             }
         });
     }

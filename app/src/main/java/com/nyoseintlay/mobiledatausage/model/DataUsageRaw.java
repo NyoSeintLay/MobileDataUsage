@@ -3,14 +3,14 @@ package com.nyoseintlay.mobiledatausage.model;
  * Created by NyoSeint Lay on 16/04/19.
  */
 
-public class DataUsage {
+public class DataUsageRaw {
 
 
     private Integer _id;
     private String quarter;
     private Double volume_of_mobile_data;
 
-    public DataUsage(Integer _id, String quarter, Double volume_of_mobile_data) {
+    public DataUsageRaw(Integer _id, String quarter, Double volume_of_mobile_data) {
         this._id = _id;
         this.quarter = quarter;
         this.volume_of_mobile_data = volume_of_mobile_data;

@@ -5,7 +5,7 @@ package com.nyoseintlay.mobiledatausage.main;
 
 import android.util.Log;
 
-import com.nyoseintlay.mobiledatausage.model.DataUsage;
+import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
 import com.nyoseintlay.mobiledatausage.network.RetrofitInstance;
 
 import org.json.JSONArray;
@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,6 +24,7 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
 
     @Override
     public void getDataUsageArrayList(final OnFinishedListener onFinishedListener) {
+
         /** Create handle for the RetrofitInstance interface*/
         GetDataService service = RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
 
@@ -34,7 +37,7 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                onFinishedListener.onFinished(getDataUsageList(response.body()));
+                onFinishedListener.onFinished(getDataUsageHashMap(response.body()));
             }
 
             @Override
@@ -44,8 +47,9 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
         });
     }
 
-    public ArrayList<DataUsage> getDataUsageList(String jsonString) {
-        ArrayList<DataUsage> dataUsageArrayList = new ArrayList<>();
+    public HashMap<Integer,ArrayList<DataUsageRaw>> getDataUsageHashMap(String jsonString) {
+
+        HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap = new HashMap<>();
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             JSONObject result = jsonObject.getJSONObject("result");
@@ -53,12 +57,22 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
 
             for (int i = 0; i < records.length(); i++) {
                 JSONObject explrObject = records.getJSONObject(i);
-                dataUsageArrayList.add(new DataUsage(explrObject.getInt("_id"), explrObject.getString("quarter"), explrObject.getDouble("volume_of_mobile_data")));
-            }
+                DataUsageRaw dataUsageRaw = new DataUsageRaw(explrObject.getInt("_id"), explrObject.getString("quarter"), explrObject.getDouble("volume_of_mobile_data"));
+                if(dataUsageHashMap.containsKey(Integer.parseInt(explrObject.getString("quarter").split("-")[0]))){
+                    ArrayList<DataUsageRaw> dataUsageRawArrayList = dataUsageHashMap.get(Integer.parseInt(explrObject.getString("quarter").split("-")[0]));
+                    dataUsageRawArrayList.add(dataUsageRaw);
+                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]),dataUsageRawArrayList);
+
+                }
+                else {
+                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]),new ArrayList<>(Arrays.asList(dataUsageRaw)));
+                }}
+
+
 
         }catch (JSONException e){
             Log.e("Exception","JSON Exception");
         }
-        return dataUsageArrayList;
+        return dataUsageHashMap;
     }
 }

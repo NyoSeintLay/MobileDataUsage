@@ -3,9 +3,10 @@ package com.nyoseintlay.mobiledatausage.main;
  * Created by NyoSeint Lay on 16/04/19.
  */
 
-import com.nyoseintlay.mobiledatausage.model.DataUsage;
+import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivityPresenter implements MainActivityInterface.presenter, MainActivityInterface.GetDataUsageIntractor.OnFinishedListener {
 
@@ -16,6 +17,7 @@ public class MainActivityPresenter implements MainActivityInterface.presenter, M
         this.mainView = mainView;
         this.getDataUsageIntractor = getDataUsageIntractor;
     }
+
 
     @Override
     public void onDestroy() {
@@ -36,14 +38,12 @@ public class MainActivityPresenter implements MainActivityInterface.presenter, M
     }
 
     @Override
-    public void onFinished(ArrayList<DataUsage> dataUsageArrayList) {
+    public void onFinished(HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap) {
         if(mainView != null){
-            mainView.setDataToRecyclerView(dataUsageArrayList);
+            mainView.setDataToRecyclerView(dataUsageHashMap);
             mainView.hideProgress();
         }
     }
-
-
     @Override
     public void onFailure(Throwable t) {
         if(mainView != null){
