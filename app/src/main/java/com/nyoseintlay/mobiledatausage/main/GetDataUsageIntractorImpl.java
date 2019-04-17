@@ -25,7 +25,7 @@ import retrofit2.Response;
 public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataUsageIntractor {
 
     @Override
-    public void getDataUsageArrayList(final OnFinishedListener onFinishedListener, boolean isNetworkAvaialble, final DatabaseHelper databaseHelper) {
+    public void getDataUsageArrayList(final OnFinishedListener onFinishedListener, final boolean isNetworkAvaialble, final DatabaseHelper databaseHelper) {
 
         if(isNetworkAvaialble) {
 
@@ -52,8 +52,7 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
             });
         }else{
             /** getDataUsage Offline*/
-            ArrayList<DataUsageByYear> dataUsageByYearArrayList = new ArrayList<>();
-            dataUsageByYearArrayList = databaseHelper.getDataUsageByYear();
+            ArrayList<DataUsageByYear> dataUsageByYearArrayList = databaseHelper.getDataUsageByYear();
             if(dataUsageByYearArrayList.size()>0)onFinishedListener.onFinished(dataUsageByYearArrayList);
             else onFinishedListener.onFailure(new Throwable());
         }

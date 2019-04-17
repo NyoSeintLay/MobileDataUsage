@@ -7,6 +7,13 @@
         android:icon="@drawable/graph"
         android:title=""
         photopette:showAsAction="ifRoom"
+        android:visible="false"
+        />
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/baseline_refresh_white_24"
+        android:title=""
+        photopette:showAsAction="ifRoom"
 
         />
 

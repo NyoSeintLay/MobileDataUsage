@@ -22,7 +22,6 @@ import com.nyoseintlay.mobiledatausage.model.DataUsageByYear;
 import com.nyoseintlay.mobiledatausage.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements MainActivityInterface.MainView {
 
@@ -30,39 +29,48 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     private RecyclerView recyclerView;
 
     private MainActivityInterface.presenter presenter;
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initializeToolbarAndRecyclerView();
+
+        initToolbarAndRecyclerView();
         initProgressBar();
+        initDatabaseHelper();
 
         presenter = new MainActivityPresenter(this, new GetDataUsageIntractorImpl());
-        presenter.requestDataFromServer(Utils.isNetworkAvailable(this),new DatabaseHelper(this));
+        presenter.requestDataFromServer(Utils.isNetworkAvailable(this),databaseHelper);
     }
 
     /**
      * Initializing Toolbar and RecyclerView
      */
-    private void initializeToolbarAndRecyclerView() {
+    private void initToolbarAndRecyclerView() {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         recyclerView = findViewById(R.id.recycler_view_data_usage_list);
-       // RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-        GridLayoutManager mGridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
+       GridLayoutManager mGridLayoutManager = new GridLayoutManager(MainActivity.this, 2);
         recyclerView.setLayoutManager(mGridLayoutManager);
 
     }
 
-
     /**
      * Initializing progressbar
      * */
-    private void initProgressBar() {
+    private void initProgressBar()
+    {
         progressBar = findViewById(R.id.progressBar);
+    }
+
+    /**
+     * Initializing Database Helper
+     */
+    private void initDatabaseHelper(){
+        databaseHelper = new DatabaseHelper(this);
     }
 
     /**
@@ -96,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     }
 
 
-
     @Override
     public void setDataToRecyclerView(ArrayList<DataUsageByYear> dataUsage) {
         DataUsageAdapter adapter = new DataUsageAdapter(dataUsage, recyclerItemClickListener);
@@ -104,21 +111,24 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     }
 
     @Override
-    public void onResponseFailure(Throwable throwable) {
-        Toast.makeText(MainActivity.this, getString(R.string.dataFailure) , Toast.LENGTH_LONG).show();
+    public void onResponseFailure(Throwable t) {
+        Toast.makeText(this,getString(R.string.dataFailure),Toast.LENGTH_LONG).show();
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_graph, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_graph:
-
+                presenter.onGraphMenuItemClick();
+                return true;
+            case R.id.action_refresh:
+                presenter.onRefreshImageButtonClick(Utils.isNetworkAvailable(getBaseContext()),databaseHelper);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
