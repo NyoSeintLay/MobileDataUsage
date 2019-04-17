@@ -3,10 +3,10 @@ package com.nyoseintlay.mobiledatausage.main;
  * Created by NyoSeint Lay on 16/04/19.
  */
 
-import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
+import com.nyoseintlay.mobiledatausage.helper.DatabaseHelper;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByYear;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public interface MainActivityInterface {
     /**
@@ -14,12 +14,10 @@ public interface MainActivityInterface {
      * */
     interface presenter{
 
-        void onDestroy();
-
-        void onRefreshButtonClick();
-
-        void requestDataFromServer();
-
+        void requestDataFromServer(boolean isNetworkAvailable,DatabaseHelper databaseHelper);
+        void onGraphMenuItemClick();
+        void onDecreasedDataUsageImageButtonClick();
+        void onRefreshImageButtonClick(boolean isNetworkAvaialble, DatabaseHelper databaseHelper);
     }
 
     /**
@@ -30,26 +28,27 @@ public interface MainActivityInterface {
 
         void showProgress();
 
-        void hideProgress();
+        void removeProgress();
 
-        void setDataToRecyclerView(HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap);
+        void setDataToRecyclerView(ArrayList<DataUsageByYear> dataUsage);
 
         void onResponseFailure(Throwable throwable);
 
     }
 
     /**
-     * Intractors are classes built for fetching data from your database, web services, or any other data source.
+     * Intractors are classes built for fetching data from your databases, web services, or any other data source.
      **/
     interface GetDataUsageIntractor {
 
         interface OnFinishedListener {
 
-            void onFinished(HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap);
+            void onFinished(ArrayList<DataUsageByYear> dataUsage);
             void onFailure(Throwable t);
         }
 
-        void getDataUsageArrayList(OnFinishedListener onFinishedListener);
+        void getDataUsageArrayList(OnFinishedListener onFinishedListener,boolean isNetworkAvaialble, DatabaseHelper databaseHelper);
+
 
 
     }

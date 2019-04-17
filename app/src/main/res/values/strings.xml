@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Data Usage</string>
     <string name="dataUsageInfo">The amount of data (Petabytes) sent over Singapore’s mobile networks from 2008 to 2018. </string>
+    <string name="dataFailure">Fail to retrieve data</string>
 </resources>

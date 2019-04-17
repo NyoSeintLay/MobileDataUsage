@@ -8,15 +8,18 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nyoseintlay.mobiledatausage.adapter.DataUsageAdapter;
 import com.nyoseintlay.mobiledatausage.R;
-import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
+import com.nyoseintlay.mobiledatausage.helper.DatabaseHelper;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByQuarter;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByYear;
+import com.nyoseintlay.mobiledatausage.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,9 +38,8 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
         initializeToolbarAndRecyclerView();
         initProgressBar();
 
-
         presenter = new MainActivityPresenter(this, new GetDataUsageIntractorImpl());
-        presenter.requestDataFromServer();
+        presenter.requestDataFromServer(Utils.isNetworkAvailable(this),new DatabaseHelper(this));
     }
 
     /**
@@ -57,21 +59,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
 
     /**
-     * Initializing progressbar programmatically
+     * Initializing progressbar
      * */
     private void initProgressBar() {
-        progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleSmall);
-        progressBar.setIndeterminate(true);
-
-        RelativeLayout relativeLayout = new RelativeLayout(this);
-        relativeLayout.setGravity(Gravity.CENTER);
-        relativeLayout.addView(progressBar);
-
-        RelativeLayout.LayoutParams params = new
-                RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-        progressBar.setVisibility(View.INVISIBLE);
-
-        this.addContentView(relativeLayout, params);
+        progressBar = findViewById(R.id.progressBar);
     }
 
     /**
@@ -79,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
      * */
     private RecyclerItemClickListener recyclerItemClickListener = new RecyclerItemClickListener() {
         @Override
-        public void onItemClick(ArrayList<DataUsageRaw> dataUsageRawArrayList) {
+        public void onItemClick(ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList) {
             String data="\n";
-            for(DataUsageRaw dataUsageRaw:dataUsageRawArrayList){
-                data += dataUsageRaw.getQuarter()+" - "+ dataUsageRaw.getVolume_of_mobile_data()+"\n";
+            for(DataUsageByQuarter dataUsageByQuarter : dataUsageByQuarterArrayList){
+                data += dataUsageByQuarter.getQuarter()+" - "+ dataUsageByQuarter.getVolume_of_mobile_data()+"\n";
             }
             Toast.makeText(MainActivity.this, data , Toast.LENGTH_LONG).show();
 
@@ -92,22 +83,44 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
 
     @Override
     public void showProgress() {
-        progressBar.setVisibility(View.VISIBLE);
+       if(progressBar!=null)progressBar.setVisibility(View.VISIBLE);
+       else{
+           initProgressBar();
+           progressBar.setVisibility(View.VISIBLE);
+       }
+
+    }
+    @Override
+    public void removeProgress() {
+        progressBar.setVisibility(View.GONE);
     }
 
-    @Override
-    public void hideProgress() {
-        progressBar.setVisibility(View.INVISIBLE);
-    }
+
 
     @Override
-    public void setDataToRecyclerView(HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap) {
-        DataUsageAdapter adapter = new DataUsageAdapter(dataUsageHashMap, recyclerItemClickListener);
+    public void setDataToRecyclerView(ArrayList<DataUsageByYear> dataUsage) {
+        DataUsageAdapter adapter = new DataUsageAdapter(dataUsage, recyclerItemClickListener);
         recyclerView.setAdapter(adapter);
     }
 
     @Override
     public void onResponseFailure(Throwable throwable) {
+        Toast.makeText(MainActivity.this, getString(R.string.dataFailure) , Toast.LENGTH_LONG).show();
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_graph, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_graph:
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

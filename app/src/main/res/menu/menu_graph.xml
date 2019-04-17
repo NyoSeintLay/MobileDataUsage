@@ -1,0 +1,13 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:photopette="http://schemas.android.com/apk/res-auto">
+
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/action_graph"
+        android:icon="@drawable/graph"
+        android:title=""
+        photopette:showAsAction="ifRoom"
+
+        />
+
+</menu>

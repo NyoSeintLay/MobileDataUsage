@@ -1,24 +1,31 @@
 package com.nyoseintlay.mobiledatausage.model;
+
+import java.util.ArrayList;
+
 /**
  * Created by NyoSeint Lay on 17/04/19.
  */
 public class DataUsageByYear {
 
-    private String year;
+    private int year;
     private Double volume_of_mobile_data_per_year;
     private Boolean isDecreasedVolume;
+    private ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList;
 
-    public DataUsageByYear(String year, Double volume_of_mobile_data_per_year,Boolean isDecreasedVolume) {
+    public DataUsageByYear() {
+    }
+    public DataUsageByYear(int year, Double volume_of_mobile_data_per_year,Boolean isDecreasedVolume,ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList) {
         this.year = year;
         this.volume_of_mobile_data_per_year = volume_of_mobile_data_per_year;
         this.isDecreasedVolume = isDecreasedVolume;
+        this.dataUsageByQuarterArrayList = dataUsageByQuarterArrayList;
     }
 
-    public String getYear() {
+    public int getYear() {
         return year;
     }
 
-    public void setYear(String year) {
+    public void setYear(int year) {
         this.year = year;
     }
 
@@ -36,5 +43,13 @@ public class DataUsageByYear {
 
     public void setDecreasedVolume(Boolean decreasedVolume) {
         isDecreasedVolume = decreasedVolume;
+    }
+
+    public ArrayList<DataUsageByQuarter> getDataUsageByQuarterArrayList() {
+        return dataUsageByQuarterArrayList;
+    }
+
+    public void setDataUsageByQuarterArrayList(ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList) {
+        this.dataUsageByQuarterArrayList = dataUsageByQuarterArrayList;
     }
 }

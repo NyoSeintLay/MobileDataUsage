@@ -4,8 +4,9 @@ package com.nyoseintlay.mobiledatausage.main;
  */
 
 import android.util.Log;
-
-import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
+import com.nyoseintlay.mobiledatausage.helper.DatabaseHelper;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByQuarter;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByYear;
 import com.nyoseintlay.mobiledatausage.network.RetrofitInstance;
 
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import retrofit2.Call;
@@ -23,33 +25,43 @@ import retrofit2.Response;
 public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataUsageIntractor {
 
     @Override
-    public void getDataUsageArrayList(final OnFinishedListener onFinishedListener) {
+    public void getDataUsageArrayList(final OnFinishedListener onFinishedListener, boolean isNetworkAvaialble, final DatabaseHelper databaseHelper) {
 
-        /** Create handle for the RetrofitInstance interface*/
-        GetDataService service = RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
+        if(isNetworkAvaialble) {
 
-        /** Call the method with parameter in the interface to get data*/
-        Call<String> call = service.getDataUsageList();
+            /** getDataUsage Online*/
+            /** Create handle for the RetrofitInstance interface*/
+            GetDataService service = RetrofitInstance.getRetrofitInstance().create(GetDataService.class);
 
-        /**Log the URL called*/
-        Log.i("URL Called", call.request().url() + "");
+            /** Call the method with parameter in the interface to get data*/
+            Call<String> call = service.getDataUsageList();
 
-        call.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                onFinishedListener.onFinished(getDataUsageHashMap(response.body()));
-            }
+            /**Log the URL called*/
+            Log.i("URL Called", call.request().url() + "");
 
-            @Override
-            public void onFailure(Call<String> call, Throwable t) {
-                onFinishedListener.onFailure(t);
-            }
-        });
+            call.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    onFinishedListener.onFinished(getDataUsage(response.body(),databaseHelper));
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    onFinishedListener.onFailure(t);
+                }
+            });
+        }else{
+            /** getDataUsage Offline*/
+            ArrayList<DataUsageByYear> dataUsageByYearArrayList = new ArrayList<>();
+            dataUsageByYearArrayList = databaseHelper.getDataUsageByYear();
+            if(dataUsageByYearArrayList.size()>0)onFinishedListener.onFinished(dataUsageByYearArrayList);
+            else onFinishedListener.onFailure(new Throwable());
+        }
     }
 
-    public HashMap<Integer,ArrayList<DataUsageRaw>> getDataUsageHashMap(String jsonString) {
+    public ArrayList<DataUsageByYear> getDataUsage(String jsonString,DatabaseHelper databaseHelper) {
 
-        HashMap<Integer,ArrayList<DataUsageRaw>> dataUsageHashMap = new HashMap<>();
+        HashMap<Integer,ArrayList<DataUsageByQuarter>> dataUsageHashMap = new HashMap<>();
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             JSONObject result = jsonObject.getJSONObject("result");
@@ -57,22 +69,46 @@ public class GetDataUsageIntractorImpl implements MainActivityInterface.GetDataU
 
             for (int i = 0; i < records.length(); i++) {
                 JSONObject explrObject = records.getJSONObject(i);
-                DataUsageRaw dataUsageRaw = new DataUsageRaw(explrObject.getInt("_id"), explrObject.getString("quarter"), explrObject.getDouble("volume_of_mobile_data"));
-                if(dataUsageHashMap.containsKey(Integer.parseInt(explrObject.getString("quarter").split("-")[0]))){
-                    ArrayList<DataUsageRaw> dataUsageRawArrayList = dataUsageHashMap.get(Integer.parseInt(explrObject.getString("quarter").split("-")[0]));
-                    dataUsageRawArrayList.add(dataUsageRaw);
-                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]),dataUsageRawArrayList);
+                DataUsageByQuarter dataUsageByQuarter = new DataUsageByQuarter(explrObject.getInt("_id"), explrObject.getString("quarter"), explrObject.getDouble("volume_of_mobile_data"));
 
+                if(dataUsageHashMap.containsKey(Integer.parseInt(explrObject.getString("quarter").split("-")[0]))){
+                    ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList = dataUsageHashMap.get(Integer.parseInt(explrObject.getString("quarter").split("-")[0]));
+                    dataUsageByQuarterArrayList.add(dataUsageByQuarter);
+                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]), dataUsageByQuarterArrayList);
                 }
                 else {
-                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]),new ArrayList<>(Arrays.asList(dataUsageRaw)));
+                    dataUsageHashMap.put(Integer.parseInt(explrObject.getString("quarter").split("-")[0]),new ArrayList<>(Arrays.asList(dataUsageByQuarter)));
                 }}
-
-
 
         }catch (JSONException e){
             Log.e("Exception","JSON Exception");
         }
-        return dataUsageHashMap;
+
+        return getDataUsageByYear(dataUsageHashMap,databaseHelper);
     }
+
+    private ArrayList<DataUsageByYear> getDataUsageByYear(HashMap<Integer,ArrayList<DataUsageByQuarter>> dataUsageHashMap,DatabaseHelper databaseHelper){
+        ArrayList<DataUsageByYear> dataUsageByYearArrayList = new ArrayList<>();
+
+        ArrayList<Integer> key = new ArrayList<>(dataUsageHashMap.keySet());
+        Collections.sort(key);
+        Double total_volume_per_year = 0.0;
+        for(int i=0;i<dataUsageHashMap.size();i++) {
+            Boolean decreasedVolume = false;
+            for (int j = 0; j < dataUsageHashMap.get(key.get(i)).size(); j++) {
+                total_volume_per_year += dataUsageHashMap.get(key.get(i)).get(j).getVolume_of_mobile_data();
+                if(j!=0 && dataUsageHashMap.get(key.get(i)).get(j-1).getVolume_of_mobile_data()>dataUsageHashMap.get(key.get(i)).get(j).getVolume_of_mobile_data()) decreasedVolume=true;
+            }
+            DataUsageByYear dataUsageByYear = new DataUsageByYear(key.get(i),total_volume_per_year,decreasedVolume,dataUsageHashMap.get(key.get(i)));
+            dataUsageByYearArrayList.add(dataUsageByYear);
+
+            /** Save in Db*/
+            databaseHelper.setDataUsageByYear(dataUsageByYear);
+            for(DataUsageByQuarter data: dataUsageByYear.getDataUsageByQuarterArrayList()){
+                databaseHelper.setDataUsageByQuarter(dataUsageByYear.getYear(),data);
+            }
+        }
+        return dataUsageByYearArrayList;
+    }
+
 }

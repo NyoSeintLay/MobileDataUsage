@@ -4,10 +4,10 @@ package com.nyoseintlay.mobiledatausage.main;
  */
 
 
-import com.nyoseintlay.mobiledatausage.model.DataUsageRaw;
+import com.nyoseintlay.mobiledatausage.model.DataUsageByQuarter;
 
 import java.util.ArrayList;
 
 public interface RecyclerItemClickListener {
-    void onItemClick(ArrayList<DataUsageRaw> dataUsageRawArrayList);
+    void onItemClick(ArrayList<DataUsageByQuarter> dataUsageByQuarterArrayList);
 }
