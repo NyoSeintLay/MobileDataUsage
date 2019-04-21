@@ -1,4 +1,5 @@
 package com.nyoseintlay.mobiledatausage.model;
+
 /**
  * Created by NyoSeint Lay on 16/04/19.
  */
@@ -42,4 +43,5 @@ public class DataUsageByQuarter {
     public void setVolume_of_mobile_data(Double volume_of_mobile_data) {
         this.volume_of_mobile_data = volume_of_mobile_data;
     }
+
 }

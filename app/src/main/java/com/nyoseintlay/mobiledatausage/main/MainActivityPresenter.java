@@ -19,7 +19,6 @@ public class MainActivityPresenter implements MainActivityInterface.presenter, M
         this.getDataUsageIntractor = getDataUsageIntractor;
     }
 
-
     @Override
     public void onDecreasedDataUsageImageButtonClick() {
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MainActivityInterface.MainView {
 
+
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
 
@@ -96,13 +97,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
            initProgressBar();
            progressBar.setVisibility(View.VISIBLE);
        }
-
     }
     @Override
     public void removeProgress() {
         progressBar.setVisibility(View.GONE);
     }
-
 
     @Override
     public void setDataToRecyclerView(ArrayList<DataUsageByYear> dataUsage) {
