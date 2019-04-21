@@ -15,8 +15,6 @@ public interface MainActivityInterface {
     interface presenter{
 
         void requestDataFromServer(boolean isNetworkAvailable,DatabaseHelper databaseHelper);
-        void onGraphMenuItemClick();
-        void onDecreasedDataUsageImageButtonClick();
         void onRefreshImageButtonClick(boolean isNetworkAvaialble, DatabaseHelper databaseHelper);
     }
 
@@ -48,8 +46,6 @@ public interface MainActivityInterface {
         }
 
         void getDataUsageArrayList(OnFinishedListener onFinishedListener,boolean isNetworkAvaialble, DatabaseHelper databaseHelper);
-
-
 
     }
 

@@ -122,9 +122,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityInter
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_graph:
-                presenter.onGraphMenuItemClick();
-                return true;
             case R.id.action_refresh:
                 presenter.onRefreshImageButtonClick(Utils.isNetworkAvailable(getBaseContext()),databaseHelper);
                 return true;

@@ -20,16 +20,6 @@ public class MainActivityPresenter implements MainActivityInterface.presenter, M
     }
 
     @Override
-    public void onDecreasedDataUsageImageButtonClick() {
-
-    }
-
-    @Override
-    public void onGraphMenuItemClick() {
-
-    }
-
-    @Override
     public void onRefreshImageButtonClick(boolean isNetworkAvailable, DatabaseHelper databaseHelper) {
 
         if(mainView != null){

@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Data Usage</string>
     <string name="dataUsageInfo">The amount of data (Petabytes) sent over Singapore’s mobile networks from 2008 to 2018. </string>
-    <string name="dataFailure">Fail to retrieve data</string>
-    <string name="connectionFailure">Unable to connect. \n In order to use offline mode in later, you still need to connect with internet once to retrieve data. \nPlease check that you are connected to the Internet and click Refresh icon to try again. </string>
-</resources>
+    <string name="dataFailure">Fail to retrieve data. Please check your internet connection. </string>
+   </resources>
